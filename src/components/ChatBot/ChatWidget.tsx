@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Mic, MicOff, Globe, X, MessageCircle, Volume2 } from 'lucide-react';
+import { Send, Mic, MicOff, Globe, X, MessageCircle, Volume2, Sun, Moon } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -21,7 +22,7 @@ export const ChatWidget: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'Hello! I\'m your AI student support assistant. How can I help you today?',
+      text: 'Hello! I\'m KnowIt, your AI student support assistant. How can I help you today?',
       isUser: false,
       timestamp: new Date(),
     }
@@ -32,6 +33,7 @@ export const ChatWidget: React.FC = () => {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -107,26 +109,28 @@ export const ChatWidget: React.FC = () => {
     { code: 'mr', name: 'मराठी (Marathi)' },
     { code: 'ta', name: 'தமிழ் (Tamil)' },
     { code: 'te', name: 'తెలుగు (Telugu)' },
+    { code: 'raj', name: 'राजस्थानी (Rajasthani)' },
+    { code: 'gu', name: 'ગુજરાતી (Gujarati)' },
   ];
 
   if (!isOpen) {
     return (
-      <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50">
           <Button
             onClick={() => setIsOpen(true)}
             size="lg"
             variant="gradient-primary"
-            className="floating-widget rounded-full h-16 w-16 shadow-glow"
+            className="floating-widget rounded-full h-14 w-14 md:h-16 md:w-16 shadow-glow"
           >
-          <MessageCircle className="h-8 w-8 text-primary-foreground" />
+          <MessageCircle className="h-6 w-6 md:h-8 md:w-8 text-primary-foreground" />
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
-      <Card className="w-96 h-[600px] flex flex-col shadow-large border-0 bg-card overflow-hidden">
+    <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50">
+      <Card className="w-[90vw] max-w-md h-[80vh] max-h-[600px] flex flex-col shadow-large border-0 bg-card overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-4 bg-gradient-primary">
           <div className="flex items-center gap-3">
@@ -134,11 +138,23 @@ export const ChatWidget: React.FC = () => {
               <MessageCircle className="h-4 w-4 text-primary-foreground" />
             </div>
             <div>
-              <h3 className="font-semibold text-primary-foreground text-sm">AI Student Support</h3>
+              <h3 className="font-semibold text-primary-foreground text-sm">KnowIt AI</h3>
               <p className="text-primary-foreground/80 text-xs">Online now</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="h-8 w-8 p-0 text-primary-foreground hover:bg-primary-foreground/20"
+            >
+              {theme === 'dark' ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+            </Button>
             <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
               <SelectTrigger className="w-10 h-8 border-primary-foreground/20 bg-transparent">
                 <Globe className="h-4 w-4 text-primary-foreground" />
