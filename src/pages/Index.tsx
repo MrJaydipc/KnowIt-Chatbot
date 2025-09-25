@@ -1,12 +1,44 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import React, { useState } from 'react';
+import { HeroSection } from '@/components/LandingPage/HeroSection';
+import { ChatWidget } from '@/components/ChatBot/ChatWidget';
+import { AdminPanel } from '@/components/AdminDashboard/AdminPanel';
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
+  const [currentView, setCurrentView] = useState<'landing' | 'admin'>('landing');
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="relative">
+      {currentView === 'landing' && (
+        <>
+          <HeroSection />
+          <ChatWidget />
+          <div className="fixed top-4 right-4 z-50">
+            <Button 
+              onClick={() => setCurrentView('admin')}
+              variant="outline"
+              size="sm"
+            >
+              Admin View
+            </Button>
+          </div>
+        </>
+      )}
+      
+      {currentView === 'admin' && (
+        <>
+          <AdminPanel />
+          <div className="fixed top-4 right-4 z-50">
+            <Button 
+              onClick={() => setCurrentView('landing')}
+              variant="outline"
+              size="sm"
+            >
+              Landing View
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   );
 };
