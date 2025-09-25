@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChatMessage } from './ChatMessage';
 import { useToast } from '@/hooks/use-toast';
+import { findAnswer } from '@/data/knowledgeBase';
 
 interface Message {
   id: string;
@@ -22,7 +23,7 @@ export const ChatWidget: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'Hello! I\'m KnowIt, your AI student support assistant. How can I help you today?',
+      text: 'Hello! I\'m KnowIt, your AI student support assistant. I can help you with fees, timetables, scholarships, exams, and more. How can I help you today?',
       isUser: false,
       timestamp: new Date(),
     }
@@ -55,21 +56,79 @@ export const ChatWidget: React.FC = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputMessage;
     setInputMessage('');
     setIsTyping(true);
 
-    // Simulate AI response
+    // Check knowledge base for predefined answers
+    const predefinedAnswer = findAnswer(currentInput, selectedLanguage);
+    
     setTimeout(() => {
-      const responses = [
-        'I understand your query. Let me help you with that information.',
-        'Based on your question, here\'s what I found in our knowledge base.',
-        'That\'s a great question! Here\'s the information you need.',
-        'I can help you with that. Here are the details you\'re looking for.',
-      ];
+      let responseText = '';
+      
+      if (predefinedAnswer) {
+        responseText = predefinedAnswer;
+      } else {
+        // Fallback responses in selected language
+        const fallbackResponses: {[key: string]: string[]} = {
+          en: [
+            'I understand your query. Let me help you with that information.',
+            'Based on your question, here\'s what I found in our knowledge base.',
+            'That\'s a great question! Here\'s the information you need.',
+            'I can help you with that. Here are the details you\'re looking for.',
+            'For specific queries, please contact the respective department or visit the college office.',
+          ],
+          hi: [
+            'मैं आपके प्रश्न को समझता हूं। मैं आपकी इस जानकारी के साथ सहायता करता हूं।',
+            'आपके प्रश्न के आधार पर, यहां वह जानकारी है जो मैंने हमारे ज्ञान आधार में पाई।',
+            'यह एक बेहतरीन प्रश्न है! यहां आपको आवश्यक जानकारी है।',
+            'मैं इसमें आपकी सहायता कर सकता हूं। यहां वे विवरण हैं जिन्हें आप खोज रहे हैं।',
+            'विशिष्ट प्रश्नों के लिए, कृपया संबंधित विभाग से संपर्क करें या कॉलेज कार्यालय जाएं।',
+          ],
+          mr: [
+            'मी तुमचा प्रश्न समजतो. मी तुम्हाला त्या माहितीसह मदत करतो।',
+            'तुमच्या प्रश्नाच्या आधारे, आमच्या ज्ञान आधारात मला मिळालेली माहिती येथे आहे।',
+            'हा एक उत्तम प्रश्न आहे! तुम्हाला आवश्यक असलेली माहिती येथे आहे।',
+            'मी त्यामध्ये तुमची मदत करू शकतो. तुम्ही शोधत असलेले तपशील येथे आहेत।',
+            'विशिष्ट प्रश्नांसाठी, कृपया संबंधित विभागाशी संपर्क साधा किंवा महाविद्यालयीन कार्यालयात भेट द्या।',
+          ],
+          ta: [
+            'உங்கள் கேள்வியை நான் புரிந்துகொள்கிறேன். அந்த தகவலுடன் உங்களுக்கு உதவுகிறேன்.',
+            'உங்கள் கேள்வியின் அடிப்படையில், எங்கள் அறிவுத் தளத்தில் நான் கண்டறிந்த தகவல் இங்கே.',
+            'அது ஒரு சிறந்த கேள்வி! உங்களுக்குத் தேவையான தகவல் இங்கே.',
+            'அதில் நான் உங்களுக்கு உதவ முடியும். நீங்கள் தேடும் விவரங்கள் இங்கே.',
+            'குறிப்பிட்ட கேள்விகளுக்கு, தயவுசெய்து சம்பந்தப்பட்ட துறையைத் தொடர்பு கொள்ளுங்கள் அல்லது கல்லூரி அலுவலகத்திற்குச் செல்லுங்கள்.',
+          ],
+          te: [
+            'మీ ప్రశ్నను నేను అర్థం చేసుకుంటున్నాను. ఆ సమాచారంతో మీకు సహాయం చేస్తున్నాను.',
+            'మీ ప్రశ్న ఆధారంగా, మా విజ్ఞాన స్థావరంలో నేను కనుగొన్న సమాచారం ఇక్కడ ఉంది.',
+            'అది ఒక గొప్ప ప్రশ్న! మీకు అవసరమైన సమాచారం ఇక్కడ ఉంది.',
+            'దానిలో నేను మీకు సహాయం చేయగలను. మీరు వెతుకుతున్న వివరాలు ఇక్కడ ఉన్నాయి.',
+            'నిర్దిష్ట ప్రశ్నల కోసం, దయచేసి సంబంధిత శాఖను సంప్రదించండి లేదా కళాశాల కార్యాలయాన్ని సందర్శించండి.',
+          ],
+          raj: [
+            'म्हारै आपका सवाल समझ में आया। म्हैं आपकी इस जानकारी के साथ मदद करूंगो।',
+            'आपके सवाल के हिसाब से, म्हारे ज्ञान के आधार में जो जानकारी मिली वो यहां है।',
+            'यो एक बढिया सवाल है! आपको जरूरी जानकारी यहां है।',
+            'इसमें म्हैं आपकी मदद कर सकूं हूं। आप जो ढूंढ रहे हो वो विवरण यहां है।',
+            'खास सवालों के लिए, कृपया संबंधित विभाग से संपर्क करो या कॉलेज ऑफिस जाओ।',
+          ],
+          gu: [
+            'હું તમારો પ્રશ્ન સમજું છું. હું તમને તે માહિતી સાથે મદદ કરું છું.',
+            'તમારા પ્રશ્નના આધારે, અમારા જ્ઞાન આધારમાં મને જે માહિતી મળી તે અહીં છે.',
+            'તે એક ઉત્તમ પ્રશ્ન છે! તમને જરૂરી માહિતી અહીં છે.',
+            'હું તેમાં તમારી મદદ કરી શકું છું. તમે જે વિગતો શોધી રહ્યા છો તે અહીં છે.',
+            'વિશિષ્ટ પ્રશ્નો માટે, કૃપા કરીને સંબંધિત વિભાગનો સંપર્ક કરો અથવા કૉલેજ ઓફિસની મુલાકાત લો.',
+          ]
+        };
+        
+        const responses = fallbackResponses[selectedLanguage] || fallbackResponses['en'];
+        responseText = responses[Math.floor(Math.random() * responses.length)];
+      }
 
       const aiMessage: Message = {
         id: Date.now().toString() + '_ai',
-        text: responses[Math.floor(Math.random() * responses.length)],
+        text: responseText,
         isUser: false,
         timestamp: new Date(),
         language: selectedLanguage,
